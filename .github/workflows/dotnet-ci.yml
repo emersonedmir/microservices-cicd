@@ -4,42 +4,29 @@ on:
   workflow_call:
     inputs:
       solution-path:
-        description: "Ruta del archivo .sln o .csproj"
         required: true
         type: string
-
       dotnet-version:
-        description: "Versión del SDK de .NET"
-        required: false
         type: string
         default: "10.0.x"
-
       test-project-path:
-        description: "Ruta del proyecto de pruebas .csproj"
-        required: false
         type: string
         default: ""
 
 jobs:
   build-and-test:
-    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
 
-      - name: Restore dependencies
-        run: dotnet restore "${{ inputs.solution-path }}"
+      - run: dotnet restore "${{ inputs.solution-path }}"
 
-      - name: Build solution
-        run: dotnet build "${{ inputs.solution-path }}" --configuration Release --no-restore
+      - run: dotnet build "${{ inputs.solution-path }}" -c Release --no-restore
 
-      - name: Run tests
-        if: ${{ inputs.test-project-path != '' }}
-        run: dotnet test "${{ inputs.test-project-path }}" --configuration Release --logger "trx"
+      - if: inputs.test-project-path != ''
+        run: dotnet test "${{ inputs.test-project-path }}" -c Release --logger trx
